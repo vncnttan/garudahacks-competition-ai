@@ -1,8 +1,11 @@
 import os
 import psycopg2
 from tqdm import tqdm
+from dotenv import load_dotenv
 from pymilvus import MilvusClient, DataType
 from openai import OpenAI
+
+load_dotenv()
 
 POSTGRES_CONN = {
     "host": os.getenv("POSTGRES_HOST", "localhost"),
@@ -11,7 +14,7 @@ POSTGRES_CONN = {
     "password": os.getenv("POSTGRES_PASSWORD", "your_password"),
     "dbname": os.getenv("POSTGRES_DB_NAME", "your_db_name")
 }
-POSTGRES_QUERY = "SELECT id, content FROM word"
+POSTGRES_QUERY = 'SELECT id, definition FROM "Word"'
 
 ZILLIZ_URI = os.getenv('MILVUS_URI', 'tcp://localhost:19530')
 ZILLIZ_TOKEN = os.getenv('MILVUS_TOKEN', 'your_milvus_token')
@@ -43,7 +46,7 @@ def setup_milvus():
     )
 
     index_params.add_index(
-        field_name="embedding", 
+        field_name="vector", 
         index_type="AUTOINDEX",
         metric_type="COSINE"
     )
@@ -52,9 +55,9 @@ def setup_milvus():
         auto_id=False,
         enable_dynamic_field=True,
     )
-    schema.add_field(field_name="id", datatype=DataType.INT64, is_primary=True, auto_id=False)
+    schema.add_field(field_name="id", datatype=DataType.VARCHAR, max_length=64, is_primary=True, auto_id=False)
     schema.add_field(field_name="content", datatype=DataType.VARCHAR, max_length=1024)
-    schema.add_field(field_name="embedding", datatype=DataType.FLOAT_VECTOR, dim=EMBEDDING_DIM)
+    schema.add_field(field_name="vector", datatype=DataType.FLOAT_VECTOR, dim=EMBEDDING_DIM)
 
     client.create_collection(
         collection_name=COLLECTION_NAME,
@@ -80,27 +83,26 @@ def fetch_postgres_data():
     conn.close()
     return results 
 
-def insert_to_milvus(data):
+def insert_to_milvus(query_results):
     data = []
-
-    for row in tqdm(data, desc="Embedding & inserting"):
-        row_id, text = row
+    for row in tqdm(query_results, desc="Embedding & inserting"):
+        id, content = row
         try:
-            emb = get_embedding(text)
+            emb = get_embedding(content)
             data.append({
-                "id": row_id,
-                "content": text,
-                "embedding": emb
+                "id": id,
+                "content": content,
+                "vector": emb
             })
         except Exception as e:
-            print(f"[ERROR] ID {row_id}: {e}")
+            print(f"[ERROR] ID {id}: {e}")
             continue
     
     res = client.insert(
         collection_name=COLLECTION_NAME,
         data=data
     )
-    print(f"Inserted {len(res)} items into Milvus.")
+    print(f"Inserted {res} items into Milvus.")
 
 if __name__ == "__main__":
     print("Connecting to Milvus...")

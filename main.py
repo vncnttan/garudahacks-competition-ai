@@ -82,6 +82,13 @@ async def ai_definition(word: str, lang_hint: str = None, language_dst: str = "i
     result = llm_answer(word, lang_hint, language_dst)
     return {"result": result}
 
+@app.get("/ai-search")
+async def ai_search(query: str, lang_hint: str = None):
+    from RAG_powered_search.rag_powered_search import llm_search_from_milvus
+    
+    results = llm_search_from_milvus(query, lang_hint)
+    return {"results": results}
+
 
 if __name__ == "__main__":
     import os

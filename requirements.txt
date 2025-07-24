@@ -6,3 +6,4 @@ groq==0.30.0
 python-dotenv==1.1.1
 psycopg2
 openai
+langchain_milvus
