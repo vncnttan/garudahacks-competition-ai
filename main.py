@@ -76,14 +76,14 @@ async def index():
     return HTMLResponse(content=html_content)
 
 
-@app.get("/ai-definition")
+@app.post("/ai-definition")
 async def ai_definition(word: str, lang_src: str = None, lang_dst: str = "id"):
     from RAG_powered_search.rag_powered_search import llm_answer
     
     result = llm_answer(word, lang_src, lang_dst)
     return {"result": result}
 
-@app.get("/ai-search")
+@app.post("/ai-search")
 async def ai_search(query: str, lang_dst: str = None):
     from RAG_powered_search.rag_powered_search import llm_search_from_milvus
     
