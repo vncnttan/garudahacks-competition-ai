@@ -1,1 +1,2 @@
-pip install -U langchain-google-genai
+langchain-google-genai
+pymilvus==v2.4.10
