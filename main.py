@@ -26,7 +26,6 @@ language_input = gr.Dropdown(
 )
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-
 stream = Stream(
     ReplyOnPause(transcribe),
     modality="audio",
@@ -67,7 +66,6 @@ def _(webrtc_id: str):
 
     return StreamingResponse(output_stream(), media_type="text/event-stream")
 
-
 @app.get("/")
 async def index():
     rtc_config = await get_credentials(huggingface_token=HF_TOKEN)
@@ -75,6 +73,14 @@ async def index():
     html_content = (cur_dir / "index.html").read_text()
     html_content = html_content.replace("__RTC_CONFIGURATION__", json.dumps(rtc_config))
     return HTMLResponse(content=html_content)
+
+
+@app.get("/ai-definition")
+async def ai_definition(word: str, lang_hint: str = None, language_dst: str = "id"):
+    from RAG_powered_search.rag_powered_search import llm_answer
+    
+    result = llm_answer(word, lang_hint, language_dst)
+    return {"result": result}
 
 
 if __name__ == "__main__":
