@@ -1,5 +1,6 @@
 import httpx
 from urllib.parse import quote
+from constants import translation_lang
 
 import numpy as np
 from fastrtc import (
@@ -28,7 +29,8 @@ async def transcribe(audio: tuple[int, np.ndarray], transcript: str, language: s
     if transcribed_text and transcribed_text.strip():
         try:
             encoded_text = quote(transcribed_text)
-            url = f"https://ftapi.pythonanywhere.com/translate?sl={translation_lang.get(language, 'id')}&dl=id&text={encoded_text}"
+            sl_code = translation_lang.get(language, {}).get('sl_code', 'id')
+            url = f"https://ftapi.pythonanywhere.com/translate?sl={sl_code}&dl=id&text={encoded_text}"
 
             async with httpx.AsyncClient() as client:
                 translation_api_response = await client.get(url, timeout=20.0)

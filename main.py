@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from AI_STT_Translation.transcribe import transcribe, get_credentials
 import os
-
 import gradio as gr
 from dotenv import load_dotenv
 from fastapi import FastAPI

@@ -2,11 +2,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 import langdetect
-
-language_dict = {
-    "jv": "Javanese",
-    "id": "Indonesian",
-}
+from ..constants import language_dict
 
 def detect_language(word):
     try:
@@ -35,5 +31,5 @@ def handle_user_query(lang_hint, user_input):
     else:
         language_src = detect_language(user_input)
 
-    prompt = create_prompt(user_input, language_dict.get(language_src, "Indonesian"))
+    prompt = create_prompt(user_input, language_dict.get(language_src['verbose'], "Indonesian"))
     return prompt

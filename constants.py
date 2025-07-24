@@ -1,22 +1,22 @@
 translation_lang = {
     'en': {
         'verbose': "English",
-        'translation_api': 'en'
+        'sl_code': 'en'
     },
     'jv': {
         'verbose': "Javanese",
-        'translation_api': 'jw'
+        'sl_code': 'jw'
     },
     'su': {
         'verbose': "Sundanese",
-        'translation_api': 'su'
+        'sl_code': 'su'
     },
     'id': {
         'verbose': "Indonesian",
-        'translation_api': 'id'
+        'sl_code': 'id'
     },
     'cn': {
         'verbose': "Cantonese",
-        'translation_api': 'cn'
+        'sl_code': 'cn'
     }
 }
