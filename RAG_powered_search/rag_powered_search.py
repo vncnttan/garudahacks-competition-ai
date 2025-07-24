@@ -31,10 +31,16 @@ def llm_answer(query: str, language_src: str, language_dst: str = "id") -> str:
 
 co = cohere.Client()
 
-def llm_search_from_milvus(query: str, language_src: str) -> str:
+def llm_search_from_milvus(query: str, language_dst: str) -> str:
+    search_kwargs = {"k": 5}
+    if language_dst:
+        search_kwargs["filter"] = {"language_code": language_dst}
+
+
+    print("Search KWARGS:", search_kwargs)
     results = vector_store.similarity_search(
         query=query,
-        k=5,
+        **search_kwargs
     )
 
     docs = []

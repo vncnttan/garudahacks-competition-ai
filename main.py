@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
-from AI_STT_Translation.transcribe import transcribe, get_credentials
+from AI_STT_Translation.transcribe import transcribe, get_credentials, transcribe_audio_file
 import os
 import gradio as gr
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastrtc import (
     ReplyOnPause,
@@ -76,18 +77,29 @@ async def index():
 
 
 @app.get("/ai-definition")
-async def ai_definition(word: str, lang_hint: str = None, language_dst: str = "id"):
+async def ai_definition(word: str, lang_src: str = None, lang_dst: str = "id"):
     from RAG_powered_search.rag_powered_search import llm_answer
     
-    result = llm_answer(word, lang_hint, language_dst)
+    result = llm_answer(word, lang_src, lang_dst)
     return {"result": result}
 
 @app.get("/ai-search")
-async def ai_search(query: str, lang_hint: str = None):
+async def ai_search(query: str, lang_dst: str = None):
     from RAG_powered_search.rag_powered_search import llm_search_from_milvus
     
-    results = llm_search_from_milvus(query, lang_hint)
+    results = llm_search_from_milvus(query, lang_dst)
     return {"results": results}
+
+@app.post("/transcribe-audio-file")
+async def transcribe_audio(
+    file: UploadFile = File(...),
+    language: str = Form("id")
+):
+    try:
+        result = await transcribe_audio_file(file, language)
+        return JSONResponse(content={"result": result}, status_code=200)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
 if __name__ == "__main__":

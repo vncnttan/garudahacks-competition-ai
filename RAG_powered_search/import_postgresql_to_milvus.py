@@ -14,7 +14,11 @@ POSTGRES_CONN = {
     "password": os.getenv("POSTGRES_PASSWORD", "your_password"),
     "dbname": os.getenv("POSTGRES_DB_NAME", "your_db_name")
 }
-POSTGRES_QUERY = 'SELECT id, definition FROM "Word"'
+POSTGRES_QUERY = """
+SELECT w.id, definition, "languageCode"
+FROM "Word" w
+JOIN "Language" l ON w."languageId" = l."id";
+"""
 
 ZILLIZ_URI = os.getenv('MILVUS_URI', 'tcp://localhost:19530')
 ZILLIZ_TOKEN = os.getenv('MILVUS_TOKEN', 'your_milvus_token')
@@ -58,6 +62,7 @@ def setup_milvus():
     schema.add_field(field_name="id", datatype=DataType.VARCHAR, max_length=64, is_primary=True, auto_id=False)
     schema.add_field(field_name="content", datatype=DataType.VARCHAR, max_length=1024)
     schema.add_field(field_name="vector", datatype=DataType.FLOAT_VECTOR, dim=EMBEDDING_DIM)
+    schema.add_field(field_name="language_code", datatype=DataType.VARCHAR, max_length=64)
 
     client.create_collection(
         collection_name=COLLECTION_NAME,
@@ -86,13 +91,14 @@ def fetch_postgres_data():
 def insert_to_milvus(query_results):
     data = []
     for row in tqdm(query_results, desc="Embedding & inserting"):
-        id, content = row
+        id, content, language_code = row
         try:
             emb = get_embedding(content)
             data.append({
                 "id": id,
                 "content": content,
-                "vector": emb
+                "vector": emb,
+                "language_code": language_code
             })
         except Exception as e:
             print(f"[ERROR] ID {id}: {e}")
