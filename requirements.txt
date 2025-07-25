@@ -4,6 +4,6 @@ langdetect
 fastrtc[vad]==0.0.20.rc2
 groq==0.30.0
 python-dotenv==1.1.1
-psycopg2
+psycopg2-binary
 openai
 langchain_milvus
