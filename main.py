@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import json
 from pathlib import Path
 from AI_STT_Translation.transcribe import transcribe, get_credentials, transcribe_audio_file
@@ -5,7 +8,7 @@ import os
 import gradio as gr
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
+
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastrtc import (
     ReplyOnPause,
@@ -16,7 +19,6 @@ from gradio.utils import get_space
 from pydantic import BaseModel
 
 
-load_dotenv()
 cur_dir = Path(__file__).parent
 
 transcript = gr.Textbox(label="Transcript", lines=10)
@@ -93,10 +95,11 @@ async def ai_search(query: str, lang_dst: str = None):
 @app.post("/transcribe-audio-file")
 async def transcribe_audio(
     file: UploadFile = File(...),
-    language: str = Form("id")
+    language_src: str = Form("id"),
+    language_dst: str = Form("en")
 ):
     try:
-        result = await transcribe_audio_file(file, language)
+        result = await transcribe_audio_file(file, language_src, language_dst)
         return JSONResponse(content={"result": result}, status_code=200)
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

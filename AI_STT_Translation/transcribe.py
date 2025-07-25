@@ -2,6 +2,7 @@ import httpx
 from urllib.parse import quote
 from constants import translation_lang
 from fastapi import UploadFile
+import os
 
 import numpy as np
 from fastrtc import (
@@ -11,7 +12,7 @@ from fastrtc import (
 )
 from groq import AsyncClient
 
-groq_client = AsyncClient()
+groq_client = AsyncClient(api_key=os.getenv("GROQ_API_KEY"))
 
 async def get_credentials(huggingface_token: str):
     return await get_cloudflare_turn_credentials_async(hf_token=huggingface_token)
@@ -59,7 +60,7 @@ async def transcribe(audio: tuple[int, np.ndarray], transcript: str, language: s
         yield
 
 
-async def transcribe_audio_file(file: UploadFile, language: str):
+async def transcribe_audio_file(file: UploadFile, language_src: str, language_dst: str):
     try:
         file_bytes = await file.read()
 
@@ -67,7 +68,7 @@ async def transcribe_audio_file(file: UploadFile, language: str):
             file=(file.filename or "audio.mp3", file_bytes),
             model="whisper-large-v3",
             response_format="json",
-            language=language,
+            language=language_src,
         )
         transcribed_text = transcription_response.text
     except Exception as e:
@@ -79,8 +80,9 @@ async def transcribe_audio_file(file: UploadFile, language: str):
     if transcribed_text and transcribed_text.strip():
         try:
             encoded_text = quote(transcribed_text)
-            sl_code = translation_lang.get(language, {}).get('sl_code', 'id')
-            url = f"https://ftapi.pythonanywhere.com/translate?sl={sl_code}&dl=id&text={encoded_text}"
+            sl_code_src = translation_lang.get(language_src, {}).get('sl_code', 'id')
+            sl_code_dst = translation_lang.get(language_dst, {}).get('sl_code', 'id')
+            url = f"https://ftapi.pythonanywhere.com/translate?sl={sl_code_src}&dl={sl_code_dst}&text={encoded_text}"
 
             async with httpx.AsyncClient() as client:
                 translation_api_response = await client.get(url, timeout=20.0)
