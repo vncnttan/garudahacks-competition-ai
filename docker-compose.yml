@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "7860:7860"
+    volumes:
+      - .:/app
+    environment:
+      - POSTGRES_HOST=postgres
+      - MILVUS_HOST=standalone
+      - POSTGRES_DB=garudahacks
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+    depends_on:
+      - postgres
+      - standalone
+
+  standalone:
+    image: milvusdb/milvus:v2.4.10
+    container_name: milvus-standalone
+    command: ["milvus", "run", "standalone"]
+    environment:
+      - ETCD_ENDPOINTS=etcd:2379
+    volumes:
+      - milvus_data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=garudahacks
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  milvus_data:
+  postgres_data:
