@@ -7,3 +7,5 @@ python-dotenv==1.1.1
 psycopg2-binary
 openai
 langchain_milvus
+langchain_openai
+cohere
