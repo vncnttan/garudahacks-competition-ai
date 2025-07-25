@@ -103,7 +103,7 @@ async def ai_search(query: str, lang_dst: str = None, lang_src: str = "id"):
     results = await llm_search_from_milvus(query, lang_dst, lang_src)
     return {"results": results}
 
-@app.get("/transcribe-audio-file")
+@app.post("/transcribe-audio-file")
 async def transcribe_audio(
     file: UploadFile = File(...),
     language_src: str = Form("id"),
