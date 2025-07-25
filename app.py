@@ -87,11 +87,11 @@ async def ai_definition(word: str, lang_src: str = None, lang_dst: str = "id"):
     result = llm_answer(word, lang_src, lang_dst)
     return {"result": result}
 
-@app.post("/ai-search")
-async def ai_search(query: str, lang_dst: str = None):
+@app.get("/ai-search")
+async def ai_search(query: str, lang_dst: str = None, lang_src: str = "id"):
     from RAG_powered_search.rag_powered_search import llm_search_from_milvus
     
-    results = llm_search_from_milvus(query, lang_dst)
+    results = await llm_search_from_milvus(query, lang_dst, lang_src)
     return {"results": results}
 
 @app.post("/transcribe-audio-file")
