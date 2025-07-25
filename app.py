@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import json
+import uuid
 from pathlib import Path
 from AI_STT_Translation.transcribe import transcribe, get_credentials, transcribe_audio_file
 import os
@@ -72,10 +73,11 @@ def _(webrtc_id: str):
 @app.get("/")
 async def index():
     rtc_config = await get_credentials(huggingface_token=HF_TOKEN)
-    print(rtc_config)
-    html_content = (cur_dir / "index.html").read_text()
-    html_content = html_content.replace("__RTC_CONFIGURATION__", json.dumps(rtc_config))
-    return HTMLResponse(content=html_content)
+    webrtc_id = str(uuid.uuid4())
+    return JSONResponse(content={
+        "webrtc_id": webrtc_id,
+        "rtc_config": rtc_config
+    })
 
 
 @app.post("/ai-definition")
