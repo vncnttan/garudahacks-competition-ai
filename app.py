@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from fastapi.middleware.cors import CORSMiddleware
 import json
 import uuid
 from pathlib import Path
@@ -42,6 +43,14 @@ stream = Stream(
 )
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or specify ["https://your-frontend.com"]
+    allow_credentials=True,
+    allow_methods=["*"],  # allow POST, OPTIONS, GET, etc.
+    allow_headers=["*"],
+)
 
 stream.mount(app)
 
